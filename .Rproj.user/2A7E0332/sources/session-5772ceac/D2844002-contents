@@ -1,0 +1,26 @@
+# Load necessary libraries
+library(ggplot2)
+
+# Select relevant columns for pairwise comparison
+selected_data <- data[, c("yearly_income", "per_capita_income")]
+
+# Pairwise scatterplot with correlations
+ggpairs(selected_data, columnLabels = c("Yearly Income", "Per Capita Income"))
+
+
+# Boxplot of Yearly Income
+ggplot(data, aes(y = yearly_income)) +
+  geom_boxplot(fill = "yellow", color = "black") +
+  labs(title = "",
+       y = "Yearly Income") +
+  theme_minimal()
+
+
+# Boxplot of Per Capita Income
+ggplot(data, aes(y = per_capita_income)) +
+  geom_boxplot(fill = "yellow", color = "black") +
+  labs(title = "",
+       y = "Per Capita Income") +
+  theme_minimal()
+
+
