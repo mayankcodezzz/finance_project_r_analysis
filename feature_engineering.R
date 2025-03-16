@@ -1,46 +1,50 @@
-### **Importing modules**
+# Importing modules
 library(readr)
 library(dplyr)
 library(lubridate)
-
 
 # Read CSV files
 df_cards <- read_csv("data/cards_preprocessed_data.csv")
 df_users <- read_csv("data/users_preprocessed_data.csv")
 
-# Determine retirement status
+# Feature Engineering for Users Dataframe
+# 1. Determine retirement status
 df_users <- df_users %>% 
   mutate(retirement_status = ifelse(current_age >= retirement_age, "Retired", "Not Retired"))
 
-# Categorize Age Groups
+# 2. Categorize Age Groups (Suggestion by Tulsi Patel)
 categorize_age <- function(age) {
   if (age <= 30) {
-    return("17-30")
+    return("18-30") 
   } else if (age <= 45) {
-    return("31-45")
+    return("31-45") 
   } else if (age <= 60) {
-    return("46-60")
+    return("46-60") 
   } else {
-    return("60+")
+    return("60+") 
   }
 }
+df_users <- df_users %>%
+  mutate(age_group = sapply(current_age, categorize_age))
 
-df_users$age_group <- sapply(df_users$current_age, categorize_age)
-
-# Flag if PIN Change is Due
-df_cards <- df_cards %>% 
-  mutate(PIN_Change_Due = ifelse(year_pin_last_changed < year(Sys.Date()) - 7, "Yes", "No"))
-
-# Calculate Debt-to-Income Ratio
+# 3. Calculate Debt-to-Income Ratio
 df_users <- df_users %>% 
   mutate(Debt_to_Income_Ratio = total_debt / yearly_income)
 
-# Merge Data
-df_merged <- left_join(df_users, df_cards, by = c("id" = "client_id"))
+# Feature Engineering for Cards Dataframe
+# 1. Flag if PIN Change is Due
+df_cards <- df_cards %>% 
+  mutate(PIN_Change_Due = ifelse(year_pin_last_changed < year(Sys.Date()) - 7, "Yes", "No"))
 
-# Define file path
+# Define file paths
 data_dir <- "data"
-file_path_merged <- file.path(data_dir, "merged_data.csv")
+file_path_users <- file.path(data_dir, "feature_engineered_users.csv")
+file_path_cards <- file.path(data_dir, "feature_engineered_cards.csv")
 
-# Save merged data
-write_csv(df_merged, file_path_merged)
+# Save feature-engineered dataframes as separate CSV files
+write_csv(df_users, file_path_users)
+write_csv(df_cards, file_path_cards)
+
+# Optional: Print confirmation
+cat("Feature-engineered users data saved to:", file_path_users, "\n")
+cat("Feature-engineered cards data saved to:", file_path_cards, "\n")
