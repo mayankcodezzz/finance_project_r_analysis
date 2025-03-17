@@ -18,7 +18,7 @@ df_logistic <- df_users %>%
 
 # Descriptive statistics for explanatory variables
 desc_stats <- df_logistic %>%
-  summarise(
+  dplyr::summarise(
     across(c(current_age, credit_score),
            list(min = ~min(.),
                 q1 = ~quantile(., 0.25),
@@ -49,25 +49,6 @@ print(summary(logit_model)$coefficients)
 df_logistic <- df_logistic %>%
   mutate(current_age_log = current_age * log(current_age),
          credit_score_log = credit_score * log(credit_score))
-
-# Refit the model with interaction terms
-box_tidwell_model <- glm(DTI_high ~ current_age + credit_score + current_age_log + credit_score_log, 
-                         family = binomial, data = df_logistic)
-print("Box-Tidwell Test for Linearity in the Logit:")
-print(summary(box_tidwell_model)$coefficients)
-
-# 2. Test for Independence of Observations (Check for Duplicate IDs)
-duplicate_ids <- df_logistic %>%
-  group_by(id) %>%
-  summarise(count = n()) %>%
-  filter(count > 1)
-print("Check for Duplicate IDs (Independence of Observations):")
-if (nrow(duplicate_ids) == 0) {
-  print("No duplicate IDs found. Independence of observations is satisfied.")
-} else {
-  print("Duplicate IDs found. Independence of observations may be violated.")
-  print(duplicate_ids)
-}
 
 # 3. Test for Multicollinearity (Correlation and Variance Inflation Factor - VIF)
 # Correlation between current_age and credit_score
@@ -185,7 +166,7 @@ sensitivity <- class_tab[2, 2] / sum(class_tab[2, ])
 specificity <- class_tab[1, 1] / sum(class_tab[1, ])
 correct_class <- (class_tab[1, 1] + class_tab[2, 2]) / sum(class_tab)
 print(paste("Sensitivity:", round(sensitivity, 4)))
-print(paste("Specificity:", round(sensitivity, 4)))
+print(paste("Specificity:", round(specificity, 4)))
 print(paste("Correct Classification Rate:", round(correct_class, 4)))
 
 # Classification Table (Cutoff = Sample Proportion)

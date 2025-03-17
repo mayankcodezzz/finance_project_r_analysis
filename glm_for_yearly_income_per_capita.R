@@ -10,13 +10,34 @@ library(lmtest)
 # Load and preprocess data
 df_merged <- read_csv("data/users_with_credit_limit.csv") %>%
   mutate(
-    across(c("retirement_status", "gender", "age_group"), as.factor),
-    per_capita_income = per_capita_income + 1,
-    credit_limit_user = credit_limit_user + 1,
-    yearly_income = yearly_income + 1,
-    total_debt = total_debt + 1,
-    credit_score=credit_score+1
+    across(c("retirement_status"), as.factor),
+    per_capita_income = per_capita_income+1,
+    yearly_income = yearly_income+1, # to avoid log 0
   )
+
+# Subset to relevant variables
+df_subset <- df_merged %>% 
+  select(yearly_income, per_capita_income)
+
+# Creating scatterplot matrix
+ggpairs(df_subset, 
+        columnLabels = c("Yearly Income", "Per Capita Income"))
+
+# Descriptive statistics for explanatory variables
+desc_stats <- df_merged %>%
+  dplyr::summarise(
+    across(c(yearly_income, per_capita_income),
+           list(min = ~min(.),
+                q1 = ~quantile(., 0.25),
+                median = ~median(.),
+                mean = ~mean(.),
+                q3 = ~quantile(., 0.75),
+                max = ~max(.),
+                sd = ~sd(.),
+                iqr = ~IQR(.)))
+  )
+print("Descriptive Statistics:")
+print(desc_stats)
 
 # Define updated function with residual analysis and plot saving
 analyze_glm <- function(formula, data, model_name, cat_var, covar_name, 
@@ -101,8 +122,8 @@ analyze_glm <- function(formula, data, model_name, cat_var, covar_name,
   return(glm_model)
 }
 
-# Run analysis for all three models
+# model 
 model <- analyze_glm(yearly_income ~ per_capita_income + retirement_status + 
                         per_capita_income:retirement_status, 
-                      df_merged, "Model 1: Yearly Income vs Per Capita Income and Retirement Status", 
+                      df_merged, "Model: Yearly Income vs Per Capita Income and Retirement Status", 
                       "retirement_status", "per_capita_income")

@@ -13,7 +13,7 @@ df_merged <- read_csv("data/merged_data.csv") %>%
 # Calculate total number of cards and distribution across card_brand
 card_distribution <- df_merged %>%
   group_by(card_brand) %>%
-  summarise(count = n()) %>%
+  dplyr::summarise(count = n()) %>%
   mutate(percentage = round(count / sum(count) * 100, 2))
 cat("\nCard Brand Distribution:\n")
 print(card_distribution)
@@ -28,7 +28,7 @@ ggplot(df_merged, aes(x = credit_limit, y = yearly_income, color = card_brand)) 
 
 # Descriptive statistics
 desc_stats <- df_merged %>%
-  summarise(
+  dplyr::summarise(
     across(c(credit_limit, yearly_income),
            list(min = ~min(.),
                 q1 = ~quantile(., 0.25),

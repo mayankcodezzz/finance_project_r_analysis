@@ -17,7 +17,7 @@ df_merged <- read_csv("data/merged_data.csv") %>%
 # Calculate total number of cards and distribution across card_type
 card_distribution <- df_merged %>%
   group_by(card_type) %>%
-  summarise(count = n()) %>%
+  dplyr::summarise(count = n()) %>%
   mutate(percentage = round(count / sum(count) * 100, 2))
 cat("\nCard Type Distribution:\n")
 print(card_distribution)
@@ -32,7 +32,7 @@ ggplot(df_merged, aes(x = credit_limit, y = yearly_income, color = card_type)) +
 
 # Descriptive statistics
 desc_stats <- df_merged %>%
-  summarise(
+  dplyr::summarise(
     across(c(credit_limit, yearly_income),
            list(min = ~min(.),
                 q1 = ~quantile(., 0.25),
@@ -43,7 +43,8 @@ desc_stats <- df_merged %>%
                 sd = ~sd(.),
                 iqr = ~IQR(.)))
   )
-print(desc_stats, width = Inf)
+print("Descriptive Statistics:")
+print(desc_stats)
 
 # ANCOVA function
 perform_ancova <- function(response, covariate, categorical_var, data) {

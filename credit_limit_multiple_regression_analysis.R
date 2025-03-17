@@ -6,9 +6,23 @@ library(lmtest)
 library(nortest)
 
 # Load data (replace with your file path if needed)
-df_merged <- read_csv("data/merged_data.csv")
+df_merged <- read_csv("data/feature_engineered_users.csv")
 
-
+# Descriptive statistics
+desc_stats <- df_merged %>%
+  dplyr::summarise(
+    across(c(total_debt,yearly_income, current_age,credit_score),
+           list(min = ~min(.),
+                q1 = ~quantile(., 0.25),
+                median = ~median(.),
+                mean = ~mean(.),
+                q3 = ~quantile(., 0.75),
+                max = ~max(.),
+                sd = ~sd(.),
+                iqr = ~IQR(.)))
+  )
+print(desc_stats, width = Inf)
+view(desc_stats)
 # Subset the data to the four variables of interest
 df_subset <- df_merged %>% 
   select(total_debt,yearly_income, current_age,credit_score)
@@ -57,7 +71,7 @@ ggplot(lm,aes(sample=.resid))+stat_qq()+stat_qq_line(color="red")+
   theme_classic()
 
 # Shapiro-Wilk test to assess the normality of the error terms by using the residuals.
-ad.test(residuals(lm)) 
+shapiro.test(residuals(lm)) 
 
 
 # Breusch-Pagan test to assess the equal spread of error terms.
